@@ -1,0 +1,50 @@
+name: metallb-speaker
+summary: Rock for the Metallb speaker.
+description: >
+  This rock is a drop in replacement for the
+  quay.io/metallb/speaker image.
+version: v0.14.5
+license: Apache-2.0
+
+base: ubuntu@22.04
+build-base: ubuntu@22.04
+platforms:
+  amd64:
+  arm64:
+
+services:
+  speaker:
+    command: /speaker
+    override: replace
+    startup: enabled
+
+parts:
+  build-deps:
+    plugin: nil
+    build-snaps:
+      - go/1.22/stable
+
+  speaker:
+    after: [build-deps]
+    plugin: go
+    source-type: git
+    source: https://github.com/metallb/metallb
+    source-tag: v0.14.5
+    source-depth: 1
+    override-build: |
+      GIT_COMMIT=`git rev-parse HEAD`
+      # We'll use the tag name.
+      GIT_BRANCH=`git describe --tags --abbrev=0`
+
+      # build frr metrics
+      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/frr-metrics \
+        -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
+        ./frr-tools/metrics/exporter.go
+
+      # build speaker
+      go build -v -o $CRAFT_PART_INSTALL/speaker \
+        -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
+        ./speaker
+
+      cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
+      cp $CRAFT_PART_SRC/frr-tools/reloader/frr-reloader.sh $CRAFT_PART_INSTALL/

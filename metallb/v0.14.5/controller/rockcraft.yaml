@@ -1,0 +1,43 @@
+name: metallb-controller
+summary: Rock for the Metallb controller.
+description: >
+  This rock is a drop in replacement for the
+  quay.io/metallb/controller image.
+version: v0.14.5
+license: Apache-2.0
+
+base: ubuntu@22.04
+build-base: ubuntu@22.04
+platforms:
+  amd64:
+  arm64:
+
+services:
+  controller:
+    command: /controller
+    override: replace
+    startup: enabled
+
+parts:
+  build-deps:
+    plugin: nil
+    build-snaps:
+      - go/1.22/stable
+
+  controller:
+    after: [build-deps]
+    plugin: go
+    source-type: git
+    source: https://github.com/metallb/metallb
+    source-tag: v0.14.5
+    source-depth: 1
+    override-build: |
+      GIT_COMMIT=`git rev-parse HEAD`
+      # We'll use the tag name.
+      GIT_BRANCH=`git describe --tags --abbrev=0`
+
+      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/controller \
+        -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
+        ./controller
+
+      cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
