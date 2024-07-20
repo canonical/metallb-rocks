@@ -26,5 +26,7 @@ def test_sanity():
     # check rock filesystem
     docker_util.ensure_image_contains_paths(rock.image, V9_0_2_EXPECTED_FILES)
 
-    docker_run = docker_util.run_in_docker(rock.image, ["/usr/lib/frr/watchfrr", "--help"])
+    docker_run = docker_util.run_in_docker(
+        rock.image, ["/usr/lib/frr/watchfrr", "--help"]
+    )
     assert V9_0_2_EXPECTED_HELPSTR in docker_run.stdout
