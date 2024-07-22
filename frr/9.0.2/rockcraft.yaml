@@ -12,9 +12,10 @@ platforms:
   amd64:
   arm64:
 
+entrypoint-service: frr
 services:
-  controller:
-    command: /usr/sbin/docker-start
+  frr:
+    command: /usr/sbin/docker-start [ -h ]
     override: replace
     startup: enabled
 
