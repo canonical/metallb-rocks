@@ -25,15 +25,33 @@ def test_metallb_0_14_5(function_instance: harness.Instance):
         HelmImage(uri=_get_rock_image("frr", "9.0.2"), prefix="frr"),
     ]
 
+    # We need to run frr as root because of:
+    # https://bugzilla.redhat.com/show_bug.cgi?id=2147522
     helm_command = k8s_util.get_helm_install_command(
         name=INSTALL_NAME,
         chart_name="metallb",
         images=images,
         namespace=constants.K8S_NS_KUBE_SYSTEM,
         repository="https://metallb.github.io/metallb",
+        chart_version="v0.14.5",
+        runAsUser=0,
     )
+    helm_command += [
+        "--set",
+        "controller.securityContext.fsGroup=0",
+        "--set",
+        "controller.securityContext.runAsNonRoot=false",
+        "--set",
+        "controller.command=/controller",
+        "--set",
+        "speaker.command=/speaker",
+    ]
     function_instance.exec(helm_command)
 
-    # k8s_util.wait_for_daemonset(
-    #     function_instance, "metallb-speaker", constants.K8S_NS_KUBE_SYSTEM
-    # )
+    k8s_util.wait_for_daemonset(
+        function_instance, "metallb-speaker", constants.K8S_NS_KUBE_SYSTEM
+    )
+
+    k8s_util.wait_for_deployment(
+        function_instance, "metallb-controller", constants.K8S_NS_KUBE_SYSTEM
+    )

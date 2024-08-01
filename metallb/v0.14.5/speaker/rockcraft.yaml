@@ -43,7 +43,7 @@ parts:
         ./frr-tools/metrics/exporter.go
 
       # build speaker
-      go build -v -o $CRAFT_PART_INSTALL/speaker \
+      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/speaker \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./speaker
 
