@@ -27,4 +27,4 @@ def test_sanity():
     assert V0_14_5_EXPECTED_HELPSTR in docker_run.stderr
 
     # check rock filesystem
-    docker_util.ensure_image_contains_paths(rock.image, V0_14_5_EXPECTED_FILES)
+    docker_util.ensure_image_contains_paths_bare(rock.image, V0_14_5_EXPECTED_FILES)
