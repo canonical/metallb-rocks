@@ -15,14 +15,14 @@ def _get_rock_image(name: str, version: str):
     rock = env_util.get_build_meta_info_for_rock_version(name, version, IMG_PLATFORM)
     return rock.image
 
-
-def test_metallb_0_14_5(function_instance: harness.Instance):
+@pytest.mark.parametrize("metallb_version,frr_version", [("v0.14.5", "9.0.2"), ("v0.14.8", "9.1.0")])
+def test_metallb(function_instance: harness.Instance, metallb_version: str, frr_version: str):
     images = [
         HelmImage(
-            uri=_get_rock_image("metallb-controller", "v0.14.5"), prefix="controller"
+            uri=_get_rock_image("metallb-controller", metallb_version), prefix="controller"
         ),
-        HelmImage(uri=_get_rock_image("metallb-speaker", "v0.14.5"), prefix="speaker"),
-        HelmImage(uri=_get_rock_image("frr", "9.0.2"), prefix="frr"),
+        HelmImage(uri=_get_rock_image("metallb-speaker", metallb_version), prefix="speaker"),
+        HelmImage(uri=_get_rock_image("frr", frr_version), prefix="frr"),
     ]
 
     # We need to run frr as root because of:
@@ -33,7 +33,7 @@ def test_metallb_0_14_5(function_instance: harness.Instance):
         images=images,
         namespace=constants.K8S_NS_KUBE_SYSTEM,
         repository="https://metallb.github.io/metallb",
-        chart_version="v0.14.5",
+        chart_version=metallb_version,
         runAsUser=0,
     )
     helm_command += [
