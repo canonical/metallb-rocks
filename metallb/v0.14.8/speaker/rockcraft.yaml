@@ -63,6 +63,11 @@ parts:
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./frr-tools/metrics/exporter.go
 
+      # build cp-tool
+      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/cp-tool \
+        -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
+        ./frr-tools/cp-tool/cp-tool.go
+
       # build speaker
       CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/speaker \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
