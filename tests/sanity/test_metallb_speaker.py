@@ -3,6 +3,9 @@
 # See LICENSE file for licensing details
 #
 
+from typing import List
+
+import pytest
 from k8s_test_harness.util import docker_util, env_util
 
 # In the future, we may also test ARM
@@ -14,17 +17,23 @@ V0_14_5_EXPECTED_FILES = [
     "LICENSE",
 ]
 
+V0_14_8_EXPECTED_FILES = V0_14_5_EXPECTED_FILES + ["/cp-tool"]
+
 # Just a line that the help string is expected to contain.
-V0_14_5_EXPECTED_HELPSTR = "Usage of /speaker:"
+EXPECTED_HELPSTR = "Usage of /speaker:"
 
 
-def test_sanity():
+@pytest.mark.parametrize(
+    "metallb_version,expected_files",
+    [("v0.14.5", V0_14_5_EXPECTED_FILES), ("v0.14.8", V0_14_8_EXPECTED_FILES)],
+)
+def test_sanity(metallb_version: str, expected_files: List[str]):
     rock = env_util.get_build_meta_info_for_rock_version(
-        IMG_NAME, "v0.14.5", IMG_PLATFORM
+        IMG_NAME, metallb_version, IMG_PLATFORM
     )
 
     docker_run = docker_util.run_in_docker(rock.image, ["/speaker", "--help"])
-    assert V0_14_5_EXPECTED_HELPSTR in docker_run.stderr
+    assert EXPECTED_HELPSTR in docker_run.stderr
 
     # check rock filesystem
-    docker_util.ensure_image_contains_paths_bare(rock.image, V0_14_5_EXPECTED_FILES)
+    docker_util.ensure_image_contains_paths_bare(rock.image, expected_files)
