@@ -19,7 +19,7 @@ def _get_rock_image(name: str, version: str):
 
 @pytest.mark.parametrize(
     "metallb_version,frr_version",
-    [("v0.14.5", "9.0.2"), ("v0.14.8", "9.1.0"), ("v0.14.9", "9.1.0")],
+    [("v0.14.5", "9.0.2"), ("v0.14.8", "9.1.0"), ("v0.14.9", "9.1.3")],
 )
 def test_metallb(
     function_instance: harness.Instance, metallb_version: str, frr_version: str
