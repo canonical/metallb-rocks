@@ -30,6 +30,7 @@ parts:
       - tzdata
       - base-passwd
       - bash
+      - coreutils
 
   # Can't have stage packages and stage slices together, apparently.
   add-base-slices:
