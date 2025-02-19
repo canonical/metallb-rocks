@@ -29,6 +29,7 @@ parts:
       - ca-certificates
       - tzdata
       - base-passwd
+      - bash
 
   # Can't have stage packages and stage slices together, apparently.
   add-base-slices:
