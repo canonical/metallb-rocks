@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Canonical, Ltd.
+# Copyright 2025 Canonical, Ltd.
 # See LICENSE file for licensing details
 #
 
@@ -19,7 +19,7 @@ EXPECTED_FILES = [
 EXPECTED_HELPSTR = "Watchdog program to monitor status of frr daemons"
 
 
-@pytest.mark.parametrize("frr_version", ["9.0.2", "9.1.0"])
+@pytest.mark.parametrize("frr_version", ["9.0.2", "9.1.0", "9.1.3"])
 def test_sanity(frr_version: str):
     rock = env_util.get_build_meta_info_for_rock_version(
         IMG_NAME, frr_version, IMG_PLATFORM

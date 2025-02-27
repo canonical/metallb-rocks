@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Canonical, Ltd.
+# Copyright 2025 Canonical, Ltd.
 # See LICENSE file for licensing details
 #
 
@@ -25,7 +25,11 @@ EXPECTED_HELPSTR = "Usage of /speaker:"
 
 @pytest.mark.parametrize(
     "metallb_version,expected_files",
-    [("v0.14.5", V0_14_5_EXPECTED_FILES), ("v0.14.8", V0_14_8_EXPECTED_FILES)],
+    [
+        ("v0.14.5", V0_14_5_EXPECTED_FILES),
+        ("v0.14.8", V0_14_8_EXPECTED_FILES),
+        ("v0.14.9", V0_14_8_EXPECTED_FILES),
+    ],
 )
 def test_sanity(metallb_version: str, expected_files: List[str]):
     rock = env_util.get_build_meta_info_for_rock_version(
