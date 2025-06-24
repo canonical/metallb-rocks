@@ -44,7 +44,7 @@ parts:
   build-deps:
     plugin: nil
     build-snaps:
-      - go/1.23/stable
+      - go/1.23-fips/stable
 
   speaker:
     after: [build-deps]
@@ -58,18 +58,22 @@ parts:
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
 
+      export CGO_ENABLED=1
+      export GOTOOLCHAIN=local
+      export GOEXPERIMENT="opensslcrypto"
+
       # build frr metrics
-      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/frr-metrics \
+      go build -v -o $CRAFT_PART_INSTALL/frr-metrics \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./frr-tools/metrics/exporter.go
 
       # build cp-tool
-      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/cp-tool \
+      go build -v -o $CRAFT_PART_INSTALL/cp-tool \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./frr-tools/cp-tool/cp-tool.go
 
       # build speaker
-      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/speaker \
+      go build -v -o $CRAFT_PART_INSTALL/speaker \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./speaker
 

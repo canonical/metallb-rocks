@@ -57,8 +57,8 @@ parts:
 
       export CGO_ENABLED=1
       export GOTOOLCHAIN=local
-      export GO_BUILDTAGS="linux cgo"
       export GOEXPERIMENT="opensslcrypto"
+
       go build -v -o $CRAFT_PART_INSTALL/controller \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./controller
