@@ -41,7 +41,7 @@ parts:
   build-deps:
     plugin: nil
     build-snaps:
-      - go/1.22/stable
+      - go/1.22-fips/stable
 
   controller:
     after: [build-deps]
@@ -55,7 +55,11 @@ parts:
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
 
-      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/controller \
+      export CGO_ENABLED=1
+      export GOTOOLCHAIN=local
+      export GO_BUILDTAGS="linux cgo"
+      export GOEXPERIMENT="opensslcrypto"
+      go build -v -o $CRAFT_PART_INSTALL/controller \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./controller
 
