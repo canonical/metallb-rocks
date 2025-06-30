@@ -20,27 +20,6 @@ services:
     startup: enabled
 
 parts:
-  add-base-files:
-    plugin: nil
-    stage-packages:
-      # Original Dockerfile uses gcr.io/distroless/static:latest as a base.
-      # This image contains the following:
-      # https://github.com/GoogleContainerTools/distroless/blob/1533e54a73805ec13fe0cc68218fc7a215a0a6f7/base/README.md
-      - ca-certificates
-      - tzdata
-      - base-passwd
-      # Helm charts may expect the image to be able to copy some files.
-      - bash
-      - coreutils
-    override-build: |
-      ln -sf bash "${CRAFT_PART_INSTALL}/bin/sh"
-
-  # Can't have stage packages and stage slices together, apparently.
-  add-base-slices:
-    plugin: nil
-    stage-packages:
-      - base-files_tmp
-
   build-deps:
     plugin: nil
     build-snaps:
@@ -53,6 +32,10 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
+    stage-snaps:
+      - core22/fips-updates/stable
+    stage:
+      - -bin
     override-build: |
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
