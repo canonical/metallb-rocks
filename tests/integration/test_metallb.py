@@ -57,6 +57,9 @@ def test_metallb(
         "--set",
         # Note(ben): Enable once we also use it in CK8s
         "frr.enabled=false",
+        "--set",
+        # Note(ben): Enable once we also use it in CK8s
+        "speaker.frr.enabled=false",
     ]
     function_instance.exec(helm_command)
 
