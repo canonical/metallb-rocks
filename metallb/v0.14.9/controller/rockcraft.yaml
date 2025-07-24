@@ -20,28 +20,10 @@ services:
     startup: enabled
 
 parts:
-  add-base-files:
-    plugin: nil
-    stage-packages:
-      # Original Dockerfile uses gcr.io/distroless/static:latest as a base.
-      # This image contains the following:
-      # https://github.com/GoogleContainerTools/distroless/blob/1533e54a73805ec13fe0cc68218fc7a215a0a6f7/base/README.md
-      - ca-certificates
-      - tzdata
-      - base-passwd
-      - bash
-      - coreutils
-
-  # Can't have stage packages and stage slices together, apparently.
-  add-base-slices:
-    plugin: nil
-    stage-packages:
-      - base-files_tmp
-
   build-deps:
     plugin: nil
     build-snaps:
-      - go/1.22/stable
+      - go/1.22-fips/stable
 
   controller:
     after: [build-deps]
@@ -50,12 +32,20 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
+    stage-snaps:
+      - core22/fips-updates/stable
+    stage:
+      - -bin
     override-build: |
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
 
-      CGO_ENABLED=0 go build -v -o $CRAFT_PART_INSTALL/controller \
+      export CGO_ENABLED=1
+      export GOTOOLCHAIN=local
+      export GOEXPERIMENT="opensslcrypto"
+
+      go build -v -o $CRAFT_PART_INSTALL/controller \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./controller
 

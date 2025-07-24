@@ -32,7 +32,6 @@ def test_metallb(
         HelmImage(
             uri=_get_rock_image("metallb-speaker", metallb_version), prefix="speaker"
         ),
-        HelmImage(uri=_get_rock_image("frr", frr_version), prefix="frr"),
     ]
 
     # We need to run frr as root because of:
@@ -55,6 +54,12 @@ def test_metallb(
         "controller.command=/controller",
         "--set",
         "speaker.command=/speaker",
+        "--set",
+        # Note(ben): Enable once we also use it in CK8s
+        "frr.enabled=false",
+        "--set",
+        # Note(ben): Enable once we also use it in CK8s
+        "speaker.frr.enabled=false",
     ]
     function_instance.exec(helm_command)
 
