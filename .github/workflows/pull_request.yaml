@@ -18,6 +18,7 @@ jobs:
       platform-labels: '{"arm64": ["self-hosted", "Linux", "ARM64", "jammy"]}'
       enabled-ubuntu-pro-features: "fips-updates"
       multipass-image: "22.04"
+      rockcraft-revisions: '{"amd64": "3494"}'
     secrets:
       UBUNTU_PRO_TOKEN: ${{ secrets.UBUNTU_PRO_TOKEN }}
   run-tests:
