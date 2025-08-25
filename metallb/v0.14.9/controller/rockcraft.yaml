@@ -25,6 +25,12 @@ parts:
     build-snaps:
       - go/1.22-fips/stable
 
+  openssl:
+    plugin: nil
+    stage-packages:
+      - openssl-fips-module-3 # a Pro only FIPS package for openssl
+      - openssl # now automatically selected from fips-preview
+
   controller:
     after: [build-deps]
     plugin: go
@@ -32,10 +38,6 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
-    stage-snaps:
-      - core22/fips-updates/stable
-    stage:
-      - -bin
     override-build: |
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
