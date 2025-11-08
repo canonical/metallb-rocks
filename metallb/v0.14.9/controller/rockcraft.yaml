@@ -20,25 +20,24 @@ services:
     startup: enabled
 
 parts:
-  build-deps:
-    plugin: nil
-    build-snaps:
-      - go/1.22-fips/stable
-
   openssl:
     plugin: nil
     stage-packages:
-      - openssl-fips-module-3 # a Pro only FIPS package for openssl
-      - openssl # now automatically selected from fips-preview
+      - openssl-fips-module-3
+      - openssl
 
   controller:
-    after: [build-deps]
-    plugin: go
+    plugin: nil
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
     override-build: |
+      # Note(ben): Override go.mod required Go version to 1.24
+      # since there is a bug in go-snap 1.22 and 1.23 FIPS that
+      # causes the build to not be fips compliant.
+      snap refresh go --channel 1.24-fips/stable
+
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
@@ -46,7 +45,6 @@ parts:
       export CGO_ENABLED=1
       export GOTOOLCHAIN=local
       export GOEXPERIMENT="opensslcrypto"
-
       go build -v -o $CRAFT_PART_INSTALL/controller \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./controller

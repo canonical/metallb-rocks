@@ -41,19 +41,19 @@ parts:
     stage-packages:
       - base-files_tmp
 
-  build-deps:
-    plugin: nil
-    build-snaps:
-      - go/1.22/stable
-
   speaker:
-    after: [build-deps]
-    plugin: go
+    plugin: nil
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.14.8
     source-depth: 1
     override-build: |
+      # Note(ben): Directly refresh go here to ensure we have
+      # the right version before any go commands are run.
+      # We've seen issues where the go version in build-snaps section
+      # of the part is not used.
+      snap refresh go --channel 1.22/stable
+
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`

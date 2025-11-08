@@ -93,12 +93,6 @@ parts:
       make -j $(nproc)
       make install
 
-  openssl:
-    plugin: nil
-    stage-packages:
-      - openssl-fips-module-3 # a Pro only FIPS package for openssl
-      - openssl # now automatically selected from fips-preview
-
   frr:
     after: [libyang]
     plugin: nil

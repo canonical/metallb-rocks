@@ -20,11 +20,6 @@ services:
     startup: enabled
 
 parts:
-  build-deps:
-    plugin: nil
-    build-snaps:
-      - go/1.23-fips/stable
-
   openssl:
     plugin: nil
     stage-packages:
@@ -32,13 +27,17 @@ parts:
       - openssl # now automatically selected from fips-preview
 
   speaker:
-    after: [build-deps]
     plugin: go
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
     override-build: |
+      # Note(ben): Override go.mod required Go version to 1.24
+      # since there is a bug in go-snap 1.22 and 1.23 FIPS that
+      # causes the build to not be fips compliant.
+      snap refresh go --channel 1.24-fips/stable
+
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
