@@ -35,8 +35,8 @@ EXPECTED_HELPSTR = "Usage of /controller:"
         ("v0.14.9", V0_14_5_EXPECTED_FILES),
     ],
 )
-def test_filesystem(version: str, expected_files: List[str]):
-    image = env_util.resolve_image(IMAGE_NAME, version)
+def test_filesystem(image_version: str, expected_files: List[str]):
+    image = env_util.get_build_meta_info_for_rock_version(IMAGE_NAME, image_version, "amd64")
     docker_util.ensure_image_contains_paths_bare(image, expected_files)
 
 
@@ -44,7 +44,7 @@ def test_filesystem(version: str, expected_files: List[str]):
     "image_version", env_util.image_versions_in_repo(IMAGE_NAME, REPO_PATH)
 )
 def test_executable(image_version):
-    image = env_util.resolve_image(IMAGE_NAME, image_version)
+    image = env_util.get_build_meta_info_for_rock_version(IMAGE_NAME, image_version, "amd64")
     docker_util.run_entrypoint_and_assert(
         image, IMAGE_ENTRYPOINT, expect_stderr_contains=EXPECTED_HELPSTR
     )
@@ -54,7 +54,7 @@ def test_executable(image_version):
     "image_version", env_util.image_versions_in_repo(IMAGE_NAME, REPO_PATH)
 )
 def test_pebble_executable(image_version):
-    image = env_util.resolve_image(IMAGE_NAME, image_version)
+    image = env_util.get_build_meta_info_for_rock_version(IMAGE_NAME, image_version, "amd64")
     docker_util.run_entrypoint_and_assert(
         image, "/bin/pebble version", expect_stdout_contains=PEBBLE_VERSION
     )
@@ -65,7 +65,7 @@ def test_pebble_executable(image_version):
     "image_version", env_util.image_versions_in_repo(IMAGE_NAME, REPO_PATH)
 )
 def test_fips(image_version, GOFIPS):
-    image = env_util.resolve_image(IMAGE_NAME, image_version)
+    image = env_util.get_build_meta_info_for_rock_version(IMAGE_NAME, image_version, "amd64")
     entrypoint = shlex.split(IMAGE_ENTRYPOINT)
 
     docker_env = ["-e", f"GOFIPS={GOFIPS}"]
