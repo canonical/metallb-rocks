@@ -31,7 +31,7 @@ EXPECTED_HELPSTR = "Usage of /speaker:"
 
 
 @pytest.mark.parametrize(
-    "version,expected_files",
+    "image_version,expected_files",
     [
         ("v0.14.5", V0_14_5_EXPECTED_FILES),
         ("v0.14.8", V0_14_8_EXPECTED_FILES),

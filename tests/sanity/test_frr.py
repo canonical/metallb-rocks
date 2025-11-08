@@ -28,7 +28,7 @@ EXPECTED_HELPSTR = "Watchdog program to monitor status of frr daemons"
 
 
 @pytest.mark.parametrize(
-    "version,expected_files",
+    "image_version,expected_files",
     [
         ("9.0.2", EXPECTED_FILES),
         ("9.1.0", EXPECTED_FILES),
