@@ -36,18 +36,14 @@ parts:
     stage-packages:
       - base-files_tmp
 
-  build-deps:
-    plugin: nil
-    build-snaps:
-      - go/1.22/stable
-
   controller:
-    after: [build-deps]
     plugin: go
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.14.5
     source-depth: 1
+    build-snaps:
+      - go/1.22/stable
     override-build: |
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
