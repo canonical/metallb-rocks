@@ -33,14 +33,14 @@ parts:
     source-tag: v0.14.9
     source-depth: 1
     override-build: |
-      GIT_COMMIT=`git rev-parse HEAD`
-      # We'll use the tag name.
-      GIT_BRANCH=`git describe --tags --abbrev=0`
-
       # Note(ben): Override go.mod required Go version to 1.24
       # since there is a bug in go-snap 1.22 and 1.23 FIPS that
       # causes the build to not be fips compliant.
       snap refresh go --channel 1.24-fips/stable
+
+      GIT_COMMIT=`git rev-parse HEAD`
+      # We'll use the tag name.
+      GIT_BRANCH=`git describe --tags --abbrev=0`
 
       export CGO_ENABLED=1
       export GOTOOLCHAIN=local
