@@ -46,6 +46,7 @@ parts:
       export GOTOOLCHAIN=local
       export GOEXPERIMENT="opensslcrypto"
       go build -v -o $CRAFT_PART_INSTALL/controller \
+        -tags "linux,cgo,ms_tls13kdf" \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./controller
 
