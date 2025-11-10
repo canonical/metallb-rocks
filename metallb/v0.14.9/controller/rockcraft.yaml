@@ -48,7 +48,7 @@ parts:
       go build -v -o $CRAFT_PART_INSTALL/controller \
         -tags "linux,cgo,ms_tls13kd" \
         -v -o $CRAFT_PART_INSTALL/controller \
-        -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
+        -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}-tags-mstlskd' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}-tags-mstlskd'" \
         ./controller
 
       cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
