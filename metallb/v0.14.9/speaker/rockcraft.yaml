@@ -48,19 +48,19 @@ parts:
 
       # build frr metrics
       go build -v -o $CRAFT_PART_INSTALL/frr-metrics \
-        -tags "linux,cgo,ms_tls13kd" \
+        -tags "linux,cgo,ms_tls13kdf" \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./frr-tools/metrics/exporter.go
 
       # build cp-tool
       go build -v -o $CRAFT_PART_INSTALL/cp-tool \
-        -tags "linux,cgo,ms_tls13kd" \
+        -tags "linux,cgo,ms_tls13kdf" \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./frr-tools/cp-tool/cp-tool.go
 
       # build speaker
       go build -v -o $CRAFT_PART_INSTALL/speaker \
-        -tags "linux,cgo,ms_tls13kd" \
+        -tags "linux,cgo,ms_tls13kdf" \
         -ldflags "-X 'go.universe.tf/metallb/internal/version.gitCommit=${GIT_COMMIT}' -X 'go.universe.tf/metallb/internal/version.gitBranch=${GIT_BRANCH}'" \
         ./speaker
 
