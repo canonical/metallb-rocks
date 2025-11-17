@@ -43,17 +43,26 @@ See [controller source]
 MetalLB's current implementation uses Go's standard `crypto` packages, which are FIPS-compliant when built with the appropriate toolchain. The following requirements must be met:
 
 1. **Go Toolchain**: Must use the modified [Go toolchain from Microsoft]
-2. **OpenSSL**: Must link against a FIPS-validated OpenSSL implementation, there is no fips base yet for rocks so e.g. from `core22/fips`.
-3. **Build Environment**: Must be built on an Ubuntu Pro machine, see below.
+2. **OpenSSL**: Must link against a FIPS-validated OpenSSL implementation.
+
+**NOTE**: This ROCK is bundled with a FIPS-validated OpenSSL library which is described in the ROCK manifest (see [this discourse post]).
+```yaml
+...
+parts:
+  openssl:
+    plugin: nil
+    stage-packages:
+      - openssl-fips-module-3
+      - openssl
+...
+```
 
 ### Required Build Modifications
 
 To build MetalLB in FIPS-compliant mode:
 
 1. **Prerequisites**:
-   - Ubuntu Pro enabled machine
-   - FIPS **not** enabled
-   - rockcraft on `edge/pro-sources` channel, see [this discourse post]
+   - a `rockcraft` version that contains the pro feature (see [this discourse post]).
 
 2. **Build Command**:
 
