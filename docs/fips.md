@@ -39,7 +39,11 @@ See [controller source]
 
 ### Implementation
 
-MetalLB's current implementation uses Go's standard `crypto` packages, which are FIPS-compliant when built with the appropriate toolchain. The following requirements must be met:
+MetalLB's current implementation uses Go's standard `crypto` packages, which are FIPS-compliant when built with the appropriate toolchain.
+If turned on, FRR mode is not FIPS-compliant. However, enabling FRR mode is not supported in Canonical Kubernetes, so this does not impact 
+FIPS compliance for the users of that Kubernetes distribution.
+
+The following requirements must be met:
 
 1. **Go Toolchain**: Must use the modified [Go toolchain from Microsoft]
 2. **OpenSSL**: Must link against a FIPS-validated OpenSSL implementation.
