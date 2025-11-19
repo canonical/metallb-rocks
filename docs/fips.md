@@ -10,7 +10,6 @@ This document uses a set of abbreviations which are explained below:
 
 - **Federal Information Processing Standards (FIPS)**: A set of standards for cryptographic modules published by the U.S. government.
 - **Border Gateway Protocol (BGP)**: A standardized exterior gateway protocol for exchanging routing information between autonomous systems on the internet.
-- **Federal Information Processing Standards (FIPS)**: A set of standards for cryptographic modules published by the U.S. government.
 - **Transport Layer Security (TLS)**: A cryptographic protocol designed to provide secure communication over a computer network.
 - **Open Source Routing Software (FRR)**: A routing software suite used for network routing protocols.
 - **Network Discovery Protocol (NDP)**: A protocol in the IPv6 suite for neighbor discovery.
@@ -40,7 +39,11 @@ See [controller source]
 
 ### Implementation
 
-MetalLB's current implementation uses Go's standard `crypto` packages, which are FIPS-compliant when built with the appropriate toolchain. The following requirements must be met:
+MetalLB's current implementation uses Go's standard `crypto` packages, which are FIPS-compliant when built with the appropriate toolchain.
+If turned on, FRR mode is not FIPS-compliant. However, enabling FRR mode is not supported in Canonical Kubernetes, so this does not impact 
+FIPS compliance for the users of that Kubernetes distribution.
+
+The following requirements must be met:
 
 1. **Go Toolchain**: Must use the modified [Go toolchain from Microsoft]
 2. **OpenSSL**: Must link against a FIPS-validated OpenSSL implementation.
@@ -59,16 +62,17 @@ parts:
 
 ### Required Build Modifications
 
-To build MetalLB in FIPS-compliant mode:
+**Prerequisites**:
 
-1. **Prerequisites**:
-   - a `rockcraft` version that contains the pro feature (see [this discourse post]).
+- a `rockcraft` version that allows building with Ubuntu Pro services (refer to [this discourse post]).
 
-2. **Build Command**:
+**Building the Image**:
 
-   ```bash
-   sudo rockcraft pack --pro=fips-updates
-   ```
+Use the following command to build the image:
+
+```bash
+sudo rockcraft pack --pro=fips-updates
+```
 
 <!-- LINKS -->
 
