@@ -3,14 +3,21 @@
 # See LICENSE file for licensing details
 #
 
+import shlex
+from pathlib import Path
 from typing import List
 
 import pytest
-from k8s_test_harness.util import docker_util, env_util
+from k8s_test_harness.util import docker_util, env_util, fips_util
 
 # In the future, we may also test ARM
-IMG_PLATFORM = "amd64"
-IMG_NAME = "metallb-speaker"
+TEST_PATH = Path(__file__)
+REPO_PATH = TEST_PATH.parent.parent.parent
+IMAGE_NAME = "metallb-speaker"
+IMAGE_BASE = f"ghcr.io/canonical/{IMAGE_NAME}"
+IMAGE_ENTRYPOINT = "/speaker --help"
+PEBBLE_VERSION = "v1.18.0"
+
 
 V0_14_5_EXPECTED_FILES = [
     "/speaker",
@@ -24,20 +31,71 @@ EXPECTED_HELPSTR = "Usage of /speaker:"
 
 
 @pytest.mark.parametrize(
-    "metallb_version,expected_files",
+    "image_version,expected_files",
     [
         ("v0.14.5", V0_14_5_EXPECTED_FILES),
         ("v0.14.8", V0_14_8_EXPECTED_FILES),
         ("v0.14.9", V0_14_8_EXPECTED_FILES),
     ],
 )
-def test_sanity(metallb_version: str, expected_files: List[str]):
-    rock = env_util.get_build_meta_info_for_rock_version(
-        IMG_NAME, metallb_version, IMG_PLATFORM
+def test_filesystem(image_version: str, expected_files: List[str]):
+    image = env_util.get_build_meta_info_for_rock_version(
+        IMAGE_NAME, image_version, "amd64"
+    ).image
+    docker_util.ensure_image_contains_paths_bare(image, expected_files)
+
+
+@pytest.mark.parametrize(
+    "image_version", env_util.image_versions_in_repo(IMAGE_NAME, REPO_PATH)
+)
+def test_executable(image_version):
+    image = env_util.get_build_meta_info_for_rock_version(
+        IMAGE_NAME, image_version, "amd64"
+    ).image
+    docker_util.run_entrypoint_and_assert(
+        image, IMAGE_ENTRYPOINT, expect_stderr_contains=EXPECTED_HELPSTR
     )
 
-    docker_run = docker_util.run_in_docker(rock.image, ["/speaker", "--help"])
-    assert EXPECTED_HELPSTR in docker_run.stderr
 
-    # check rock filesystem
-    docker_util.ensure_image_contains_paths_bare(rock.image, expected_files)
+@pytest.mark.parametrize(
+    "image_version", env_util.image_versions_in_repo(IMAGE_NAME, REPO_PATH)
+)
+def test_pebble_executable(image_version):
+    image = env_util.get_build_meta_info_for_rock_version(
+        IMAGE_NAME, image_version, "amd64"
+    ).image
+    docker_util.run_entrypoint_and_assert(
+        image, "/bin/pebble version", expect_stdout_contains=PEBBLE_VERSION
+    )
+
+
+@pytest.mark.parametrize("GOFIPS", [0, 1], ids=lambda v: f"GOFIPS={v}")
+@pytest.mark.parametrize(
+    "image_version", env_util.image_versions_in_repo(IMAGE_NAME, REPO_PATH)
+)
+def test_fips(image_version, GOFIPS):
+    image = env_util.get_build_meta_info_for_rock_version(
+        IMAGE_NAME, image_version, "amd64"
+    ).image
+    entrypoint = shlex.split(IMAGE_ENTRYPOINT)
+
+    docker_env = ["-e", f"GOFIPS={GOFIPS}"]
+    process = docker_util.run_in_docker(
+        image, entrypoint, check_exit_code=False, docker_args=docker_env
+    )
+
+    rockcraft_yaml = (
+        (REPO_PATH / "metallb" / image_version / "speaker" / "rockcraft.yaml")
+        .read_text()
+        .lower()
+    )
+    expected_returncode, expected_error = fips_util.fips_expectations(
+        rockcraft_yaml, GOFIPS
+    )
+
+    assert (
+        process.returncode == expected_returncode
+    ), f"Return code mismatch for {entrypoint} in image {image}, stderr: {process.stderr}"
+    assert (
+        expected_error in process.stderr
+    ), f"Error message mismatch for {entrypoint} in image {image}, stderr: {process.stderr}"
