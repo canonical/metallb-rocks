@@ -42,6 +42,9 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.5
     source-depth: 1
+    build-environment:
+      - GOPROXY: https://proxy.golang.org,direct
+      - GODEBUG: http2client=0
     override-build: |
       # Note(ben): Directly refresh go here to ensure we have
       # the right version before any go commands are run.
@@ -58,3 +61,4 @@ parts:
         ./controller
 
       cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
+# Trigger build

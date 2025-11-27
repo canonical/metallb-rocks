@@ -32,6 +32,9 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
+    build-environment:
+      - GOPROXY: https://proxy.golang.org,direct
+      - GODEBUG: http2client=0
     override-build: |
       # Note(ben): Override go.mod required Go version to 1.24
       # since there is a bug in go-snap 1.22 and 1.23 FIPS that
@@ -66,3 +69,4 @@ parts:
 
       cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
       cp $CRAFT_PART_SRC/frr-tools/reloader/frr-reloader.sh $CRAFT_PART_INSTALL/
+# Trigger build
