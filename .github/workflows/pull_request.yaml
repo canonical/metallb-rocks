@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-push-arch-specifics:
     name: Build Rocks and Push Arch Specific Images
-    uses: canonical/k8s-workflows/.github/workflows/build_rocks.yaml@KU-4668/go-build-issues
+    uses: canonical/k8s-workflows/.github/workflows/build_rocks.yaml@main
     with:
       owner: ${{ github.repository_owner }}
       trivy-image-config: "trivy.yaml"
@@ -18,7 +18,6 @@ jobs:
       platform-labels: '{"arm64": ["self-hosted", "Linux", "ARM64", "jammy"]}'
       enabled-ubuntu-pro-features: "fips-updates"
       rockcraft-revisions: '{"amd64": "3494", "arm64": "3547"}'
-      build-env: '{}'
     secrets:
       UBUNTU_PRO_TOKEN: ${{ secrets.UBUNTU_PRO_TOKEN }}
   run-tests:

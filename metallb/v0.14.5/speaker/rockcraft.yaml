@@ -47,6 +47,8 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.5
     source-depth: 1
+    # Use GOPROXY with direct fallback and disable HTTP/2 to avoid transient EOF errors
+    # from proxy.golang.org on self-hosted runners
     build-environment:
       - GOPROXY: https://proxy.golang.org,direct
       - GODEBUG: http2client=0
@@ -73,4 +75,3 @@ parts:
 
       cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
       cp $CRAFT_PART_SRC/frr-tools/reloader/frr-reloader.sh $CRAFT_PART_INSTALL/
-# Trigger build
