@@ -32,10 +32,7 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
     source-depth: 1
-    # Use direct Go module downloads to avoid transient EOF errors
-    # from proxy.golang.org on self-hosted runners
     build-environment:
-      - GOPROXY: direct
     override-build: |
       # Note(ben): Override go.mod required Go version to 1.24
       # since there is a bug in go-snap 1.22 and 1.23 FIPS that

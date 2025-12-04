@@ -42,10 +42,7 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.5
     source-depth: 1
-    # Use direct Go module downloads to avoid transient EOF errors
-    # from proxy.golang.org on self-hosted runners
     build-environment:
-      - GOPROXY: direct
     override-build: |
       # Note(ben): Directly refresh go here to ensure we have
       # the right version before any go commands are run.
