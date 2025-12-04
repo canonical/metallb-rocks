@@ -47,10 +47,9 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.5
     source-depth: 1
-    # Disable HTTP/2 and use direct Go module downloads to avoid transient EOF errors
+    # Use direct Go module downloads to avoid transient EOF errors
     # from proxy.golang.org on self-hosted runners
     build-environment:
-      - GODEBUG: http2client=0
       - GOPROXY: direct
     override-build: |
       # Note(ben): Directly refresh go here to ensure we have
