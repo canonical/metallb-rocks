@@ -34,6 +34,7 @@ parts:
     source-depth: 1
     override-build: |
       # Enable Go caching for improved build reliability
+      # Testing Go module and build cache feature
       # Note(ben): Override go.mod required Go version to 1.24
       # since there is a bug in go-snap 1.22 and 1.23 FIPS that
       # causes the build to not be fips compliant.
