@@ -42,7 +42,6 @@ parts:
     source: https://github.com/metallb/metallb
     source-tag: v0.14.8
     source-depth: 1
-    build-environment:
     override-build: |
       # Note(ben): Directly refresh go here to ensure we have
       # the right version before any go commands are run.
