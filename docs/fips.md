@@ -4,19 +4,15 @@ For comprehensive information about FIPS 140-3 compliance in Canonical Kubernete
 
 > **Note:** As of now, FRR and pebble are not built in a FIPS-compliant way. This document will be updated once they are.
 
-## MetalLB-Specific Information
-
-### BGP Authentication and FIPS
+## BGP Authentication and FIPS
 
 While MetalLB allows MD5 authentication for BGP sessions, **MD5 is not FIPS-compliant** and should be avoided in FIPS mode. MD5 authentication calls will fail on a FIPS-enabled system.
 
-### FRR Mode
+## FRR Mode
 
 FRR mode is not FIPS-compliant. However, enabling FRR mode is not supported in Canonical Kubernetes, so this does not impact FIPS compliance for users of that Kubernetes distribution.
 
-### Component Details
-
-#### Speaker Component
+## Speaker
 
 MetalLB's speaker component primarily handles BGP/NDP protocols and service advertisement. The speaker's cryptographic usage is minimal and focused on:
 
@@ -25,7 +21,7 @@ MetalLB's speaker component primarily handles BGP/NDP protocols and service adve
 
 See [speaker source](https://github.com/metallb/metallb/blob/main/internal/speakerlist/speakerlist.go#L16).
 
-#### Controller Component
+## Controller
 
 The controller handles the Kubernetes API communication and IP address management. Its cryptographic usage includes:
 
