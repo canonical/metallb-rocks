@@ -10,7 +10,7 @@ While MetalLB allows MD5 authentication for BGP sessions, **MD5 is not FIPS-comp
 
 ## FRR Mode
 
-FRR mode is not FIPS-compliant. However, enabling FRR mode is not supported in Canonical Kubernetes, so this does not impact FIPS compliance for users of that Kubernetes distribution.
+FRR mode is not FIPS-compliant. However, enabling FRR mode is not supported in Canonical Kubernetes, so this does not impact FIPS compliance for our users.
 
 ## Speaker
 
