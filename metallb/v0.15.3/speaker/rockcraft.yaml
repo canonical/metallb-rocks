@@ -10,7 +10,6 @@ base: bare
 build-base: ubuntu@22.04
 platforms:
   amd64:
-  arm64:
 
 entrypoint-service: speaker
 services:
@@ -27,13 +26,16 @@ parts:
       - openssl # now automatically selected from fips-preview
 
   speaker:
-    plugin: go
+    plugin: nil
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.15.3
     source-depth: 1
+    disable-parallel: true
+    build-snaps:
+      - go/1.25-fips/stable
     override-build: |
-      snap refresh go --channel 1.25-fips/stable
+      go version
 
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
