@@ -26,8 +26,14 @@ parts:
       - openssl-fips-module-3 # a Pro only FIPS package for openssl
       - openssl # now automatically selected from fips-preview
 
+  patches:
+    plugin: dump
+    source: .
+
   speaker:
     plugin: go
+    build-snaps:
+      - go
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.14.9
@@ -41,6 +47,8 @@ parts:
       GIT_COMMIT=`git rev-parse HEAD`
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
+
+      git am /root/parts/patches/src/0001-L2Status-controller-refactor-to-leader-node-manages-.patch
 
       export CGO_ENABLED=1
       export GOTOOLCHAIN=local
