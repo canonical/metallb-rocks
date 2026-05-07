@@ -48,7 +48,7 @@ parts:
       # We'll use the tag name.
       GIT_BRANCH=`git describe --tags --abbrev=0`
 
-      git am /root/parts/patches/src/0001-L2Status-controller-refactor-to-leader-node-manages-.patch
+      git am /root/parts/patches/src/0001-L2Status-controller-refactor-to-leader-node.patch
 
       export CGO_ENABLED=1
       export GOTOOLCHAIN=local
