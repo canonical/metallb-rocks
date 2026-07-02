@@ -30,6 +30,9 @@ jobs:
     with:
       rock-metas: ${{ needs.build-and-push-arch-specifics.outputs.rock-metas }}
   scan-images:
+    permissions:
+      security-events: write
+      packages: read
     uses: canonical/k8s-workflows/.github/workflows/scan_images.yaml@6b24c265636d618fb98d5f56231c5581a1b429ab
     needs: [build-and-push-arch-specifics]
     secrets: inherit
