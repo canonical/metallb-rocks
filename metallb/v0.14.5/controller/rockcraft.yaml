@@ -38,6 +38,8 @@ parts:
 
   controller:
     plugin: nil
+    build-snaps:
+      - go
     source-type: git
     source: https://github.com/metallb/metallb
     source-tag: v0.14.5
