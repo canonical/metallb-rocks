@@ -8,7 +8,10 @@ on:
 jobs:
   build-and-push-arch-specifics:
     name: Build Rocks and Push Arch Specific Images
-    uses: canonical/k8s-workflows/.github/workflows/build_rocks.yaml@6b24c265636d618fb98d5f56231c5581a1b429ab
+    permissions:
+      contents: read
+      packages: write
+    uses: canonical/k8s-workflows/.github/workflows/build_rocks.yaml@1f72669125e711d252c472f45ad98f22ff592d28
     with:
       owner: ${{ github.repository_owner }}
       trivy-image-config: "trivy.yaml"
@@ -17,7 +20,6 @@ jobs:
       arch-skipping-maximize-build-space: '["arm64"]'
       platform-labels: '{"arm64": ["self-hosted", "linux", "arm64", "jammy", "xlarge"], "amd64": ["self-hosted", "linux", "amd64", "jammy", "xlarge"]}'
       enabled-ubuntu-pro-features: "fips-updates"
-      rockcraft-revisions: '{"amd64": "3494", "arm64": "3547"}'
     secrets:
       UBUNTU_PRO_TOKEN: ${{ secrets.UBUNTU_PRO_TOKEN }}
   run-tests:
@@ -27,6 +29,9 @@ jobs:
     with:
       rock-metas: ${{ needs.build-and-push-arch-specifics.outputs.rock-metas }}
   scan-images:
+    permissions:
+      security-events: write
+      packages: read
     uses: canonical/k8s-workflows/.github/workflows/scan_images.yaml@6b24c265636d618fb98d5f56231c5581a1b429ab
     needs: [build-and-push-arch-specifics]
     secrets: inherit
