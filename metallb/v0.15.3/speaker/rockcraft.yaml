@@ -51,6 +51,8 @@ parts:
       export GOTOOLCHAIN=local
       export GOEXPERIMENT="opensslcrypto"
 
+      go test -v ./...
+
       # build frr metrics
       go build -v -o $CRAFT_PART_INSTALL/frr-metrics \
         -tags "linux,cgo,ms_tls13kdf" \
