@@ -1,0 +1,82 @@
+name: frr-k8s
+summary: Rock for the FRR-K8s controller.
+description: >
+  This rock is a drop in replacement for the
+  quay.io/metallb/frr-k8s image.
+version: v0.0.25
+license: Apache-2.0
+
+base: bare
+build-base: ubuntu@22.04
+platforms:
+  amd64:
+  arm64:
+
+entrypoint-service: frr-k8s
+services:
+  frr-k8s:
+    command: /frr-k8s [ -h ]
+    override: replace
+    startup: enabled
+
+parts:
+  openssl:
+    plugin: nil
+    stage-packages:
+      - openssl-fips-module-3
+      - openssl
+
+  # The frr-k8s chart init containers run `/bin/sh -c "cp -f ..."`
+  # to copy the reloader, metrics and status binaries to shared volumes.
+  shell:
+    plugin: nil
+    stage-packages:
+      - dash_bins
+      - coreutils_bins
+
+  frr-k8s:
+    plugin: go
+    build-snaps:
+      - go
+    source-type: git
+    source: https://github.com/metallb/frr-k8s
+    source-tag: v0.0.25
+    source-depth: 1
+    override-build: |
+      snap refresh go --channel 1.25-fips/stable
+
+      GIT_COMMIT=`git rev-parse HEAD`
+      # We'll use the tag name.
+      GIT_BRANCH=`git describe --tags --abbrev=0`
+
+      export CGO_ENABLED=1
+      export GOTOOLCHAIN=local
+      export GOEXPERIMENT="opensslcrypto"
+      LDFLAGS="-X 'github.com/metallb/frr-k8s/internal/version.gitCommit=${GIT_COMMIT}' -X 'github.com/metallb/frr-k8s/internal/version.gitBranch=${GIT_BRANCH}'"
+
+      # build frr metrics
+      go build -v -o $CRAFT_PART_INSTALL/frr-metrics \
+        -tags "linux,cgo,ms_tls13kdf" \
+        -ldflags "${LDFLAGS}" \
+        ./cmd/metrics/exporter.go
+
+      # build frr status
+      go build -v -o $CRAFT_PART_INSTALL/frr-status \
+        -tags "linux,cgo,ms_tls13kdf" \
+        -ldflags "${LDFLAGS}" \
+        ./cmd/status/exporter.go
+
+      # build frr-k8s controller
+      go build -v -o $CRAFT_PART_INSTALL/frr-k8s \
+        -tags "linux,cgo,ms_tls13kdf" \
+        -ldflags "${LDFLAGS}" \
+        ./cmd/frr-k8s-controller/main.go
+
+      # build status cleaner
+      go build -v -o $CRAFT_PART_INSTALL/statuscleaner \
+        -tags "linux,cgo,ms_tls13kdf" \
+        -ldflags "${LDFLAGS}" \
+        ./cmd/statuscleaner/main.go
+
+      cp $CRAFT_PART_BUILD/LICENSE $CRAFT_PART_INSTALL/
+      cp $CRAFT_PART_SRC/cmd/reloader/frr-reloader.sh $CRAFT_PART_INSTALL/
