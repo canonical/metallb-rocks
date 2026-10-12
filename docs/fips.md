@@ -11,20 +11,26 @@ While MetalLB allows MD5 authentication for BGP sessions, **MD5 is not FIPS-comp
 ## FRR Mode
 
 As of `frr/10.4.1`, the FRR rock is built with `--with-crypto=openssl` and
-stages `openssl-fips-module-3` (see [rockcraft.yaml](../frr/10.4.1/rockcraft.yaml)),
-so BFD keyed-SHA1 authentication (`HMAC-SHA1` via OpenSSL,
-[bfd_packet.c](https://github.com/FRRouting/frr/blob/88f5c06cbc1cc4d62e1cba3e7791f5cea4179ba5/bfdd/bfd_packet.c#L29-L31))
-now dynamically links against the Pro FIPS-validated OpenSSL module at runtime.
+stages `openssl-fips-module-3` (see [rockcraft.yaml](../frr/10.4.1/rockcraft.yaml)).
+This makes OSPF, RIPv2, and IS-IS's existing keyed MD5/SHA authentication
+FIPS-compliant (`ospfd/ospf_auth.c`, `ospf6d/ospf6_auth_trailer.c`,
+`ripd/ripd.c`, `isisd/isis_tlvs.c` all gate their auth implementation behind
+`CRYPTO_OPENSSL`) by dynamically linking those daemons against the Pro
+FIPS-validated OpenSSL module at runtime.
 
-Two caveats remain:
+Caveats:
 
-- BFD authentication is capped at keyed-SHA1 or cleartext by FRR itself
-  ([bfd.c#L667-L670](https://github.com/FRRouting/frr/blob/88f5c06cbc1cc4d62e1cba3e7791f5cea4179ba5/bfdd/bfd.c#L667-L670));
-  SHA-256/384/512 key-chain entries are never selected for BFD sessions.
+- **BFD authentication is unimplemented in FRR 10.4.1**, independent of this
+  fix: `bfdd/bfd_packet.c`'s `bfd_check_auth()` unconditionally returns
+  `false` for both `BFD_AUTH_SIMPLE` and `BFD_AUTH_CRYPTOGRAPHIC` ("RFC5880
+  6.7: To be finshed"), and `--with-crypto=openssl` has no effect on `bfdd`
+  on this version (`CRYPTO_OPENSSL` is never referenced under `bfdd/` in
+  10.4.1). BFD keychain auth only lands in FRR 10.7.0+ — see the
+  `frr/10.7.1` rock.
 - MetalLB's `BFDProfile` CRD has no field to attach a key-chain to a BFD
-  session, so this capability is not yet reachable through MetalLB's own
-  configuration surface. Enabling it requires upstream MetalLB changes to the
-  `BFDProfile` API and FRR config template, not just the rock build.
+  session either way, so BFD auth is not reachable through MetalLB's own
+  configuration surface regardless of FRR version. Enabling it requires
+  upstream MetalLB changes to the `BFDProfile` API and FRR config template.
 - BGP MD5 (`neighbor ... password`) remains **not** FIPS-compliant — see
   "BGP Authentication and FIPS" above.
 
