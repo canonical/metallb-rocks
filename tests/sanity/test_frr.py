@@ -98,10 +98,10 @@ def test_docker_start_boots_daemons(frr_version: str):
             f.write(MINIMAL_DAEMONS_CONF)
         open(os.path.join(tmpdir, "frr.conf"), "w").close()
         open(os.path.join(tmpdir, "vtysh.conf"), "w").close()
-        os.chmod(tmpdir, 0o777)
-        os.chmod(rundir, 0o777)
+        os.chmod(tmpdir, 0o755)
+        os.chmod(rundir, 0o755)
         for name in ("daemons", "frr.conf", "vtysh.conf"):
-            os.chmod(os.path.join(tmpdir, name), 0o666)
+            os.chmod(os.path.join(tmpdir, name), 0o644)
 
         docker_run = docker_util.run_in_docker(
             rock.image,
