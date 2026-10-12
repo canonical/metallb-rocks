@@ -111,10 +111,10 @@ parts:
 
       ./bootstrap.sh
       ./configure \
-         --prefix=$CRAFT_PART_INSTALL/usr \
+         --prefix=/usr \
          --sysconfdir=/etc \
          --localstatedir=/var \
-         --sbindir=$CRAFT_PART_INSTALL/usr/lib/frr \
+         --sbindir=/usr/lib/frr \
          --enable-rpki \
          --enable-vtysh \
          --enable-multipath=64 \
@@ -124,7 +124,7 @@ parts:
          --enable-scripting \
          --with-crypto=openssl
       make -j $(nproc)
-      make install
+      make install DESTDIR=$CRAFT_PART_INSTALL
 
       mkdir -p $CRAFT_PART_INSTALL/usr/sbin
       cp $CRAFT_PART_SRC/docker/debian/docker-start \
