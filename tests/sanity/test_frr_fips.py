@@ -46,9 +46,19 @@ def test_frr_links_fips_openssl_module(frr_version: str):
     contents directly without running dpkg --install, so staged
     packages (openssl-fips-module-3 included) never appear in
     `dpkg -l` -- that would only reflect packages baked into the
-    ubuntu@22.04 base image itself. `openssl list -providers` is the
-    actual runtime proof: it reports the Pro-signed FIPS provider
-    (not just that some file exists on disk).
+    ubuntu@22.04 base image itself.
+
+    Note: `openssl list -providers` only reports the `fips` provider
+    as active when the *host* kernel has FIPS mode enabled
+    (/proc/sys/crypto/fips_enabled=1) -- on this CI runner (plain
+    ubuntu-22.04, not Pro/FIPS-attached), the same correctly-built
+    image reports only the `default` provider even though the FIPS
+    module is staged. Checking for that would make this test fail on
+    every CI run regardless of whether the rock is correct.
+    `openssl fipsinstall -module ... -out ...` is host-independent: it
+    loads the module and runs its own cryptographic self-tests,
+    succeeding only if the module file is present, uncorrupted, and
+    passes self-test -- proof the module was actually staged.
     """
     rock = env_util.get_build_meta_info_for_rock_version(
         IMG_NAME, frr_version, IMG_PLATFORM
@@ -61,10 +71,16 @@ def test_frr_links_fips_openssl_module(frr_version: str):
     )
     assert "libcrypto" in docker_run.stdout
 
-    # The Pro FIPS-validated OpenSSL provider must actually load at
-    # runtime, not just a generic libssl3 with no FIPS provider configured.
+    # The Pro FIPS-validated OpenSSL module must be present and pass its
+    # own self-test, independent of the host kernel's FIPS mode.
     docker_run = docker_util.run_in_docker(
-        rock.image, ["sh", "-c", "openssl list -providers"]
+        rock.image,
+        [
+            "sh",
+            "-c",
+            "openssl fipsinstall "
+            "-module /usr/lib/x86_64-linux-gnu/ossl-modules-3/fips.so "
+            "-out /tmp/fipsmodule.cnf -quiet && cat /tmp/fipsmodule.cnf",
+        ],
     )
-    assert "fips" in docker_run.stdout
-    assert "status: active" in docker_run.stdout
+    assert "activate = 1" in docker_run.stdout
