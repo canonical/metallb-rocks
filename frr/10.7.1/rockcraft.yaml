@@ -20,6 +20,12 @@ services:
     startup: enabled
 
 parts:
+  openssl:
+    plugin: nil
+    stage-packages:
+      - openssl-fips-module-3 # a Pro only FIPS package for openssl
+      - openssl # now automatically selected from fips-preview
+
   build-deps:
     plugin: nil
     build-packages:
@@ -115,7 +121,8 @@ parts:
          --enable-vty-group=frrvty \
          --enable-user=frr \
          --enable-group=frr \
-         --enable-scripting
+         --enable-scripting \
+         --with-crypto=openssl
       make -j $(nproc)
       make install
 
@@ -139,5 +146,4 @@ parts:
       - libgrpc10
       - liblua5.3-0
       - lua5.3
-      - libssl3
       - librtr0
