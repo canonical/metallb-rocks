@@ -15,7 +15,8 @@ IMG_NAME = "frr"
 #
 # NOTE: bfdd/bgpd do NOT use CRYPTO_OPENSSL on 10.4.1 -- bfd_check_auth()
 # in bfdd/bfd_packet.c is an unimplemented stub (always returns false for
-# BFD_AUTH_SIMPLE/BFD_AUTH_CRYPTOGRAPHIC, "RFC5880 6.7: To be finshed").
+# BFD_AUTH_SIMPLE/BFD_AUTH_CRYPTOGRAPHIC, per an upstream TODO comment
+# marking that RFC5880 Section 6.7 auth handling is unimplemented).
 # --with-crypto=openssl only affects ospfd/ospf6d/ripd/isisd's MD5/SHA
 # key-chain auth (ospfd/ospf_auth.c, ripd/ripd.c, ospf6d/ospf6_auth_trailer.c,
 # isisd/isis_tlvs.c), which is what this test exercises.

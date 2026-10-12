@@ -22,9 +22,10 @@ Caveats:
 
 - **BFD authentication is unimplemented in FRR 10.4.1**, independent of this
   fix: `bfdd/bfd_packet.c`'s `bfd_check_auth()` unconditionally returns
-  `false` for both `BFD_AUTH_SIMPLE` and `BFD_AUTH_CRYPTOGRAPHIC` ("RFC5880
-  6.7: To be finshed"), and `--with-crypto=openssl` has no effect on `bfdd`
-  on this version (`CRYPTO_OPENSSL` is never referenced under `bfdd/` in
+  `false` for both `BFD_AUTH_SIMPLE` and `BFD_AUTH_CRYPTOGRAPHIC`, per an
+  upstream TODO comment marking RFC5880 Section 6.7 auth handling as
+  unimplemented, and `--with-crypto=openssl` has no effect on `bfdd` on
+  this version (`CRYPTO_OPENSSL` is never referenced under `bfdd/` in
   10.4.1). BFD keychain auth only lands in FRR 10.7.0+ — see the
   `frr/10.7.1` rock.
 - MetalLB's `BFDProfile` CRD has no field to attach a key-chain to a BFD
