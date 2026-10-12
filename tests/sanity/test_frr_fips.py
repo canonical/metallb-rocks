@@ -33,7 +33,16 @@ def test_frr_built_with_openssl_crypto(frr_version: str):
 def test_frr_links_fips_openssl_module(frr_version: str):
     """The rock must stage the Pro FIPS-validated OpenSSL module so that
     the dynamically-linked libcrypto resolves to it at runtime, not a
-    generic libssl3 build with no FIPS provider loaded."""
+    generic libssl3 build with no FIPS provider loaded.
+
+    Note: craft-parts' stage-packages mechanism unpacks .deb file
+    contents directly without running dpkg --install, so staged
+    packages (openssl-fips-module-3 included) never appear in
+    `dpkg -l` -- that would only reflect packages baked into the
+    ubuntu@22.04 base image itself. `openssl list -providers` is the
+    actual runtime proof: it reports the Pro-signed FIPS provider
+    (not just that some file exists on disk).
+    """
     rock = env_util.get_build_meta_info_for_rock_version(
         IMG_NAME, frr_version, IMG_PLATFORM
     )
@@ -45,9 +54,10 @@ def test_frr_links_fips_openssl_module(frr_version: str):
     )
     assert "libcrypto" in docker_run.stdout
 
-    # The Pro FIPS-validated OpenSSL package must actually be staged in the
-    # image, not just a generic libssl3 with no FIPS provider loaded.
+    # The Pro FIPS-validated OpenSSL provider must actually load at
+    # runtime, not just a generic libssl3 with no FIPS provider configured.
     docker_run = docker_util.run_in_docker(
-        rock.image, ["sh", "-c", "dpkg -l | grep openssl-fips-module"]
+        rock.image, ["sh", "-c", "openssl list -providers"]
     )
-    assert "openssl-fips-module" in docker_run.stdout
+    assert "fips" in docker_run.stdout
+    assert "status: active" in docker_run.stdout
