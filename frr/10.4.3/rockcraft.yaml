@@ -15,7 +15,7 @@ platforms:
 entrypoint-service: frr
 services:
   frr:
-    command: /usr/sbin/docker-start [ -h ]
+    command: /usr/lib/frr/docker-start [ -h ]
     override: replace
     startup: enabled
 
@@ -86,12 +86,14 @@ parts:
     override-build: |
       mkdir -p build
       cd build
-      mkdir -p $CRAFT_PART_INSTALL/usr
 
-      cmake -DCMAKE_INSTALL_PREFIX:PATH=$CRAFT_PART_INSTALL/usr \
+      # Install through DESTDIR so that libyang's plugin directories point
+      # to /usr rather than the part's install directory.
+      cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr \
+          -DCMAKE_INSTALL_LIBDIR:PATH=lib \
           -DCMAKE_BUILD_TYPE:String="Release" ..
       make -j $(nproc)
-      make install
+      make install DESTDIR=$CRAFT_PART_INSTALL
 
   frr:
     after: [libyang]
@@ -105,10 +107,10 @@ parts:
 
       ./bootstrap.sh
       ./configure \
-         --prefix=$CRAFT_PART_INSTALL/usr \
+         --prefix=/usr \
          --sysconfdir=/etc \
          --localstatedir=/var \
-         --sbindir=$CRAFT_PART_INSTALL/usr/lib/frr \
+         --sbindir=/usr/lib/frr \
          --enable-rpki \
          --enable-vtysh \
          --enable-multipath=64 \
@@ -117,11 +119,28 @@ parts:
          --enable-group=frr \
          --enable-scripting
       make -j $(nproc)
-      make install
+      # Install through DESTDIR so that the runtime paths compiled into the
+      # binaries and scripts (e.g. watchfrr's daemon start commands) are the
+      # final /usr ones rather than the part's install directory.
+      make install DESTDIR=$CRAFT_PART_INSTALL
 
+      # Match the upstream image layout: the frr-k8s chart runs
+      # "/sbin/tini -- /usr/lib/frr/docker-start".
+      install -D -m 0755 $CRAFT_PART_SRC/docker/alpine/docker-start \
+        $CRAFT_PART_INSTALL/usr/lib/frr/docker-start
+      install -D -m 0644 $CRAFT_PART_SRC/tools/etc/frr/daemons \
+        $CRAFT_PART_INSTALL/etc/frr/daemons
+
+  tini:
+    plugin: nil
+    stage-packages:
+      - tini
+    override-build: |
+      craftctl default
+
+      # /sbin is a symlink to /usr/sbin on the base.
       mkdir -p $CRAFT_PART_INSTALL/usr/sbin
-      cp $CRAFT_PART_SRC/docker/debian/docker-start \
-        $CRAFT_PART_INSTALL/usr/sbin/docker-start
+      ln -s ../bin/tini $CRAFT_PART_INSTALL/usr/sbin/tini
 
   runtime-deps:
     plugin: nil
@@ -141,3 +160,9 @@ parts:
       - lua5.3
       - libssl3
       - librtr0
+      # Required by frr-reload.py, which the frr-k8s reloader runs.
+      - python3
+      # The frr-k8s chart copies its FIPS-built frr-metrics and frr-status
+      # binaries into this image, so the OpenSSL FIPS provider must be here.
+      - openssl-fips-module-3
+      - openssl
